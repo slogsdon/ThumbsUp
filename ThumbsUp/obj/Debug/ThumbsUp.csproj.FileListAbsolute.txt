@@ -1,0 +1,5 @@
+c:\users\slogsdon\documents\visual studio 2010\Projects\ThumbsUp\ThumbsUp\bin\ThumbsUp.dll
+c:\users\slogsdon\documents\visual studio 2010\Projects\ThumbsUp\ThumbsUp\bin\ThumbsUp.pdb
+c:\users\slogsdon\documents\visual studio 2010\Projects\ThumbsUp\ThumbsUp\obj\Debug\ResolveAssemblyReference.cache
+c:\users\slogsdon\documents\visual studio 2010\Projects\ThumbsUp\ThumbsUp\obj\Debug\ThumbsUp.dll
+c:\users\slogsdon\documents\visual studio 2010\Projects\ThumbsUp\ThumbsUp\obj\Debug\ThumbsUp.pdb
