@@ -1,23 +1,12 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" %>
-<%@ Import Namespace="System.Security.Principal" %>
-
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head runat="server">
-    <title></title>
-</head>
-<body>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" 
+    CodeBehind="Index.aspx.cs" Inherits="ThumbsUp.Index" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="MainPlcHldr" runat="server">
     <form id="Form1" method="post" runat="server">
         <asp:Label ID="lblName" runat="server" /><br />
-        <asp:Label ID="lblAuthType" runat="server" />
+        <asp:Label ID="lblAuthType" runat="server" /><br />
+        <asp:DropDownList ID="selectOUUsers" runat="server"></asp:DropDownList>
+        <asp:RadioButtonList ID="lbRating" runat="server" RepeatDirection="Vertical" RepeatLayout="UnorderedList"></asp:RadioButtonList>
     </form>
-</body>
-</html>
-<script runat="server">
-    void Page_Load(object sender, EventArgs e)
-    {
-        lblName.Text = "Hello " + Context.User.Identity.Name + ".";
-        lblAuthType.Text = "You were authenticated using " + Context.User.Identity.AuthenticationType + ".";
-    }
-</script>
+</asp:Content>

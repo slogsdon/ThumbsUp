@@ -5,7 +5,6 @@ using System.Web;
 using System.Web.Security;
 using System.Web.SessionState;
 
-using System.Web.Security;
 using System.Security.Principal;
 
 namespace ThumbsUp

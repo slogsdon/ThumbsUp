@@ -5,6 +5,7 @@ using System.Web.Security;
 
 using System.Security.Principal;
 using System.DirectoryServices;
+using System.DirectoryServices.ActiveDirectory;
 
 namespace ThumbsUp
 {
@@ -12,6 +13,8 @@ namespace ThumbsUp
     {
         private string _path;
         private string _filterAttribute;
+        private string _domain;
+        private string _username;
 
         public LdapAuthentication(string path)
         {
@@ -20,6 +23,9 @@ namespace ThumbsUp
 
         public bool IsAuthenticated(string domain, string username, string pwd)
         {
+            _domain = domain;
+            _username = username;
+
             string domainAndUsername = domain + @"\" + username;
             DirectoryEntry entry = new DirectoryEntry(_path, domainAndUsername, pwd);
 
@@ -83,6 +89,57 @@ namespace ThumbsUp
                 throw new Exception("Error obtaining group names. " + ex.Message);
             }
             return groupNames.ToString();
+        }
+
+        public string FriendlyDomainToLdapDomain(string friendlyDomainName) 
+        {
+            if (friendlyDomainName == null || friendlyDomainName == "") friendlyDomainName = _domain;
+
+            string ldapPath = null;
+            try
+            {
+                DirectoryContext objContext = new DirectoryContext(DirectoryContextType.Domain, friendlyDomainName);
+                Domain objDomain = Domain.GetDomain(objContext);
+                ldapPath = objDomain.Name;
+            }
+            catch (DirectoryServicesCOMException e)
+            {
+                ldapPath = e.Message.ToString();
+            }
+            return ldapPath;
+        }
+
+        public ArrayList EnumerateOU(string OuDn)
+        {
+            ArrayList alObjects = new ArrayList();
+            try 
+            {
+                DirectoryEntry directoryObject = new DirectoryEntry("LDAP://" + OuDn);
+                foreach (DirectoryEntry child in directoryObject.Children) 
+                {
+                    string childPath = child.Path.ToString();
+                    childPath = childPath.Remove(0, 7);
+
+                    if ("OU=" == childPath.Substring(0, 3))
+                    {
+                        alObjects.AddRange(EnumerateOU(childPath));
+                    }
+                    else
+                    {
+                        alObjects.Add(childPath);//remove ldap prefix
+                    }
+
+                    child.Close();
+                    child.Dispose();
+                }
+                directoryObject.Close();
+                directoryObject.Dispose();
+            }
+            catch (DirectoryServicesCOMException e) 
+            {
+                throw new DirectoryServicesCOMException("An error occured. " + e.Message);
+            }
+            return alObjects;
         }
     }
 }
