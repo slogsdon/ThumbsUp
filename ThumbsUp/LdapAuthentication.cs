@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Text;
 using System.Collections;
+using System.Web;
 using System.Web.Security;
 
 using System.Security.Principal;
+using System.Data;
 using System.DirectoryServices;
 using System.DirectoryServices.ActiveDirectory;
 
@@ -140,6 +142,64 @@ namespace ThumbsUp
                 throw new DirectoryServicesCOMException("An error occured. " + e.Message);
             }
             return alObjects;
+        }
+
+        public DataSet FindUsers(string sFilter, string[] columns, string path, bool useCached)
+        {
+            //try to retrieve from cache first
+            HttpContext context = HttpContext.Current;
+            DataSet userDS = (DataSet)context.Cache[sFilter];
+
+            if ((userDS == null) || (!useCached))
+            {
+                //setup the searching entries
+                DirectoryEntry deParent = new DirectoryEntry(path);
+                //deParent.Username = Config.Settings.UserName;
+                //deParent.Password = Config.Settings.Password;
+                deParent.AuthenticationType = AuthenticationTypes.Secure;
+
+                DirectorySearcher ds = new DirectorySearcher(
+                    deParent,
+                    sFilter,
+                    columns,
+                    SearchScope.Subtree
+                    );
+
+                ds.PageSize = 1000;
+
+                using (deParent)
+                {
+                    //setup the dataset that will store the results
+                    userDS = new DataSet("userDS");
+                    DataTable dt = userDS.Tables.Add("users");
+                    DataRow dr;
+
+                    //add each parameter as a column
+                    foreach (string prop in columns)
+                    {
+                        dt.Columns.Add(prop, typeof(string));
+                    }
+
+                    using (SearchResultCollection src = ds.FindAll())
+                    {
+                        foreach (SearchResult sr in src)
+                        {
+                            dr = dt.NewRow();
+                            foreach (string prop in columns)
+                            {
+                                if (sr.Properties.Contains(prop))
+                                {
+                                    dr[prop] = sr.Properties[prop][0];
+                                }
+                            }
+                            dt.Rows.Add(dr);
+                        }
+                    }
+                }
+                //cache it for later, with sliding 3 minute window
+                context.Cache.Insert(sFilter, userDS, null, DateTime.MaxValue, TimeSpan.FromSeconds(180));
+            }
+            return userDS;
         }
     }
 }
