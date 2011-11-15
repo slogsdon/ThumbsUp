@@ -4,9 +4,8 @@
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="MainPlcHldr" runat="server">
     <form id="Form1" method="post" runat="server">
-        <asp:Label ID="lblName" runat="server" /><br />
-        <asp:Label ID="lblAuthType" runat="server" /><br />
-        <asp:DropDownList ID="selectOUUsers" runat="server"></asp:DropDownList>
-        <asp:RadioButtonList ID="lbRating" runat="server" RepeatDirection="Vertical" RepeatLayout="UnorderedList"></asp:RadioButtonList>
+    <asp:Label ID="Message" runat="server" />
+    <asp:AccessDataSource ID="SubmissionsAccessDS" runat="server" DataFile="~/db.mdb" />
+    <asp:PlaceHolder ID="SubmissionsPlcHldr" runat="server" />
     </form>
 </asp:Content>

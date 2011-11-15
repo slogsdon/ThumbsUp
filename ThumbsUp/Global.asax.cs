@@ -29,6 +29,7 @@ namespace ThumbsUp
 
         void Application_AuthenticateRequest(object sender, EventArgs e)
         {
+            /*
             string cookieName = FormsAuthentication.FormsCookieName;
             HttpCookie authCookie = Context.Request.Cookies[cookieName];
 
@@ -61,6 +62,7 @@ namespace ThumbsUp
             //this principal flows throughout the request
             GenericPrincipal principal = new GenericPrincipal(id, groups);
             Context.User = principal;
+            */
         }
 
         protected void Application_Error(object sender, EventArgs e)

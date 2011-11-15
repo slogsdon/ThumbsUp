@@ -22,39 +22,30 @@ namespace ThumbsUp {
         protected global::System.Web.UI.HtmlControls.HtmlForm Form1;
         
         /// <summary>
-        /// lblName control.
+        /// Message control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblName;
+        protected global::System.Web.UI.WebControls.Label Message;
         
         /// <summary>
-        /// lblAuthType control.
+        /// SubmissionsAccessDS control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblAuthType;
+        protected global::System.Web.UI.WebControls.AccessDataSource SubmissionsAccessDS;
         
         /// <summary>
-        /// selectOUUsers control.
+        /// SubmissionsPlcHldr control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList selectOUUsers;
-        
-        /// <summary>
-        /// lbRating control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RadioButtonList lbRating;
+        protected global::System.Web.UI.WebControls.PlaceHolder SubmissionsPlcHldr;
     }
 }

@@ -7,6 +7,7 @@ using System.Web.UI.WebControls;
 using System.Web.Security;
 
 using System.Data;
+using System.Data.OleDb;
 using System.DirectoryServices;
 using System.DirectoryServices.ActiveDirectory;
 
@@ -14,15 +15,65 @@ namespace ThumbsUp
 {
     public partial class Submit : System.Web.UI.Page
     {
+        protected string _user;
+
         protected void Page_Load(object sender, EventArgs e)
         {
             Page.Header.Title = Page.Header.Title + " - Submit";
+            _user = (Context.User.Identity.Name.Split('\\'))[1].ToString();
 
             lblName.Text = "Hello " + Context.User.Identity.Name + ".";
             lblAuthType.Text = "You were authenticated using " + Context.User.Identity.AuthenticationType + ".";
 
             BindDropDownList();
             BindRadioList();
+
+            if (IsPostBack)
+            {
+                FormSubmit();
+            }
+        }
+
+        public void FormSubmit()
+        {
+            Form1.Visible = false;
+            ListItemCollection results = new ListItemCollection();
+            foreach (string key in Request.Form.Keys)
+            {
+                if (key.Substring(0, 2) != "__")
+                {
+                    string[] keyArray = key.Split('$');
+                    results.Add(new ListItem(keyArray[keyArray.Length - 1], Request.Form[key]));
+                }
+            }
+            OleDbConnection connection = new OleDbConnection("Provider=Microsoft.Jet.Oledb.4.0;" +
+                        "Data Source=" + Server.MapPath("db.mdb"));
+            connection.Open();
+
+            string query = "INSERT INTO Submissions([User], [Person], [Rating], [Description], [Votes]) VALUES {1};";
+            string values = "'" + _user + "', ";
+            foreach (ListItem item in results)
+            {
+                values += "'" + item.Value + "', ";
+            }
+            values += "'" + _user + "'";
+
+            query = query.Replace("{1};", "(" + values + ");");
+
+            OleDbCommand command = new OleDbCommand(query, connection);
+
+            try
+            {
+                command.ExecuteNonQuery();
+            }
+            catch (Exception e)
+            {
+                Response.Write("error: " + e.Message + ". \nsql: " + query + ". \nvalues: " + values);
+            }
+
+            connection.Close();
+
+            Response.Redirect("Index.aspx");
         }
 
         public void BindDropDownList()
@@ -38,7 +89,7 @@ namespace ThumbsUp
                 users.Columns.Add(prop, typeof(string));
             }
 
-            string[] exclude = new string[] { 
+            string[] exclude = new string[] {
                 "sh1pryor", "sh1lalley", "sh1smith", "sh1curtis", "sh1bailey", "sh1russell",
                 "sh1morris", "sh1patterson", "sh1barron", "sh1vanfrank", "sh1bush", "sh1twilson",
                 "sh1fqureshi", "sh1brunt", "sh1larsen", "sh1boren", "sh1tqureshi", "sh1garrone",
@@ -54,7 +105,7 @@ namespace ThumbsUp
                 {
                     if (!exclude.Contains(dr["sAMAccountName"]))
                     {
-                        if (dr["sAMAccountName"].ToString() != Context.User.Identity.Name &&
+                        if (dr["sAMAccountName"].ToString() != _user && // ldap auth just needs Context.User.Identity.Name
                             (dr["userAccountControl"].ToString() == "512" ||
                             dr["userAccountControl"].ToString() == "1114624"))
                         {

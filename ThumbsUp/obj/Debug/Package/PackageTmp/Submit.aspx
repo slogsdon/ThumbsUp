@@ -8,5 +8,7 @@
         <asp:Label ID="lblAuthType" runat="server" /><br />
         <asp:DropDownList ID="selectOUUsers" runat="server"></asp:DropDownList>
         <asp:RadioButtonList ID="lbRating" runat="server" RepeatDirection="Vertical" RepeatLayout="UnorderedList"></asp:RadioButtonList>
+        <asp:TextBox ID="txtBoxDescription" runat="server" TextMode="MultiLine" rows="8" cols="40"></asp:TextBox>
+        <input type="submit" id="btnSubmit" value="Submit" />
     </form>
-</asp:Content>
+    </asp:Content>
