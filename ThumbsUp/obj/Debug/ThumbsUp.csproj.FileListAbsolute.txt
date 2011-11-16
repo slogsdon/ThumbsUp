@@ -3,3 +3,8 @@ c:\users\slogsdon\documents\visual studio 2010\Projects\ThumbsUp\ThumbsUp\bin\Th
 c:\users\slogsdon\documents\visual studio 2010\Projects\ThumbsUp\ThumbsUp\obj\Debug\ResolveAssemblyReference.cache
 c:\users\slogsdon\documents\visual studio 2010\Projects\ThumbsUp\ThumbsUp\obj\Debug\ThumbsUp.dll
 c:\users\slogsdon\documents\visual studio 2010\Projects\ThumbsUp\ThumbsUp\obj\Debug\ThumbsUp.pdb
+C:\Users\shane\Code\ThumbsUp\ThumbsUp\bin\ThumbsUp.dll
+C:\Users\shane\Code\ThumbsUp\ThumbsUp\bin\ThumbsUp.pdb
+C:\Users\shane\Code\ThumbsUp\ThumbsUp\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\shane\Code\ThumbsUp\ThumbsUp\obj\Debug\ThumbsUp.dll
+C:\Users\shane\Code\ThumbsUp\ThumbsUp\obj\Debug\ThumbsUp.pdb

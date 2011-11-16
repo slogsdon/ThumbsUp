@@ -12,7 +12,7 @@ namespace ThumbsUp
     {
         protected string _user;
         protected string _db;
-        protected DBItem[] _dbItemList;
+        protected ArrayList _dbItemList;
         protected string _thumbImg;
 
         protected void Page_Load(object sender, EventArgs e)
@@ -29,43 +29,45 @@ namespace ThumbsUp
         {
             using (SubmissionsPlcHldr)
             {
-                Controls.Add(new LiteralControl("<div id=\"submissions\">"));
+                Controls.Add(new LiteralControl("<div id=\"submissions\">\n"));
 
-                DBItem[] list = GetSubmissions();
-
-                foreach (DBItem item in list)
+                ArrayList list = GetSubmissions();
+                if (null != list)
                 {
-                    Controls.Add(new LiteralControl("\t<div class=\"submission\">"));
-                    Controls.Add(new LiteralControl("\t\t<span class=\"date\">"));
-                    Controls.Add(new LiteralControl("\t\t\t" + item.Date));
-                    Controls.Add(new LiteralControl("\t\t</span>"));
-                    Controls.Add(new LiteralControl("\t\t<p>"));
-                    Controls.Add(new LiteralControl("\t\t\t" + item.Description));
-                    Controls.Add(new LiteralControl("\t\t</p>"));
-                    Controls.Add(new LiteralControl("\t\t<div>"));
-                    Controls.Add(new LiteralControl("\t\t\t<img src=\"" + Server.MapPath(_thumbImg) + "\" alt=\"thumb\" />"));
-                    Controls.Add(new LiteralControl("\t\t\t<span class=\"vote_count\">"));
-                    Controls.Add(new LiteralControl("\t\t\t\t" + (item.Votes.Split(',').Length - 1)));
-                    Controls.Add(new LiteralControl("\t\t\t</span>"));
-                    Controls.Add(new LiteralControl("\t\t</div>"));
-                    Controls.Add(new LiteralControl("\t</div>"));
+                    foreach (DBItem item in list)
+                    {
+                        Controls.Add(new LiteralControl("\t<div class=\"submission\">\n"));
+                        Controls.Add(new LiteralControl("\t\t<span class=\"DateTime\">\n"));
+                        Controls.Add(new LiteralControl("\t\t\t" + item.DateTime + "\n"));
+                        Controls.Add(new LiteralControl("\t\t</span>\n"));
+                        Controls.Add(new LiteralControl("\t\t<p>\n"));
+                        Controls.Add(new LiteralControl("\t\t\t" + item.Description + "\n"));
+                        Controls.Add(new LiteralControl("\t\t</p>\n"));
+                        Controls.Add(new LiteralControl("\t\t<div>\n"));
+                        Controls.Add(new LiteralControl("\t\t\t<img src=\"" + Server.MapPath(_thumbImg) + "\" alt=\"thumb\" />\n"));
+                        Controls.Add(new LiteralControl("\t\t\t<span class=\"vote_count\">\n"));
+                        Controls.Add(new LiteralControl("\t\t\t\t" + (item.Votes.Split(',').Length - 1) + "\n"));
+                        Controls.Add(new LiteralControl("\t\t\t</span>\n"));
+                        Controls.Add(new LiteralControl("\t\t</div>\n"));
+                        Controls.Add(new LiteralControl("\t</div>\n"));
+                    }
                 }
 
-                Controls.Add(new LiteralControl("</div>"));
+                Controls.Add(new LiteralControl("</div>\n"));
             }
         }
 
-        protected DBItem[] GetSubmissions()
+        protected ArrayList GetSubmissions()
         {
-            string query = "SELECT [ID], [User], [Date], [Person], [Rating], [Description], [Votes] FROM Submissions;";
-            ExecuteQuery(query, (reader) => GetSubmissionsQueryCallback(reader));
+            string query = "SELECT [ID], [User], [DateTime], [Person], [Rating], [Description], [Votes] FROM [Submissions];";
+            ExecuteQuery(query, GetSubmissionsQueryCallback);
 
             return _dbItemList;
         }
 
-        protected DBItem[] GetSubmissionsQueryCallback(OleDbDataReader reader)
+        protected ArrayList GetSubmissionsQueryCallback(OleDbDataReader reader)
         {
-            DBItem[] returnList = new DBItem[] { };
+            ArrayList returnList = new ArrayList();
 
             if (reader.HasRows)
             {
@@ -73,21 +75,21 @@ namespace ThumbsUp
                 {
                     DBItem item = new DBItem();
 
-                    item.ID = reader.GetInt16(reader.GetOrdinal("ID"));
+                    item.ID = reader.GetInt32(reader.GetOrdinal("ID"));
                     item.User = reader.GetString(reader.GetOrdinal("User"));
-                    item.Date = reader.GetString(reader.GetOrdinal("Date"));
+                    item.DateTime = reader.GetDateTime(reader.GetOrdinal("DateTime"));
                     item.Person = reader.GetString(reader.GetOrdinal("Person"));
                     item.Rating = reader.GetString(reader.GetOrdinal("Rating"));
                     item.Description = reader.GetString(reader.GetOrdinal("Description"));
                     item.Votes = reader.GetString(reader.GetOrdinal("Votes"));
 
-                    returnList[returnList.Length] = item;
+                    returnList.Add(item);
                 }
             }
             return returnList;
         }
 
-        protected DBItem[] GetVotes(int id)
+        protected ArrayList GetVotes(int id)
         {
             string query = "SELECT [Votes] FROM Submissions WHERE [ID] = " + id + ";";
             ExecuteQuery(query, GetVotesQueryCallback);
@@ -95,9 +97,9 @@ namespace ThumbsUp
             return _dbItemList;
         }
 
-        protected DBItem[] GetVotesQueryCallback(OleDbDataReader reader)
+        protected ArrayList GetVotesQueryCallback(OleDbDataReader reader)
         {
-            DBItem[] returnList = new DBItem[] { };
+            ArrayList returnList = new ArrayList { };
 
             if (reader.HasRows)
             {
@@ -105,46 +107,47 @@ namespace ThumbsUp
                 {
                     DBItem item = new DBItem();
                     item.Votes = reader.GetString(reader.GetOrdinal("Votes"));
-                    returnList[returnList.Length] = item;
+                    returnList.Add(item);
                 }
             }
             return returnList;
         }
 
-        protected bool ExecuteQuery(string query, Func<OleDbDataReader, DBItem[]> callback = null)
+        protected bool ExecuteQuery(string query, Func<OleDbDataReader, ArrayList> callback = null)
         {
-            string db = _db;
-            
             bool rowsAffected = false;
-
-            OleDbConnection connection = new OleDbConnection("Provider=Microsoft.Jet.Oledb.4.0" +
-                "Data Source=" + Server.MapPath("db.mdb"));
+            
+            OleDbConnection connection = new OleDbConnection("Provider=Microsoft.Jet.Oledb.4.0;" +
+                "Data Source=" + Server.MapPath(_db));
             try
             {
                 connection.Open();
-                OleDbCommand command = new OleDbCommand(query, connection);
-                try
+                using (OleDbCommand command = new OleDbCommand(query, connection))
                 {
-                    if (query.Substring(0, 6) == "SELECT")
+                    try
                     {
-                        if (callback != null)
+                        if (query.Substring(0, 6) == "SELECT")
                         {
-                            _dbItemList = callback.Invoke(command.ExecuteReader());
+                            if (callback != null)
+                            {
+                                _dbItemList = callback.Invoke(command.ExecuteReader());
+                            }
+                            rowsAffected = true;
                         }
-                        rowsAffected = true;
+                        else
+                        {
+                            rowsAffected = Convert.ToBoolean(command.ExecuteNonQuery());
+                        }
+
                     }
-                    else
+                    catch (OleDbException e)
                     {
-                        rowsAffected = Convert.ToBoolean(command.ExecuteNonQuery());
+                        // cannot excute query
                     }
-                }
-                catch (Exception e)
-                {
-                    // cannot excute query
                 }
                 connection.Close();
             }
-            catch (Exception e)
+            catch (OleDbException e)
             {
                 // cannot connect
             }
@@ -156,7 +159,7 @@ namespace ThumbsUp
     {
         private int _ID;
         private string _User;
-        private string _Date;
+        private DateTime _DateTime;
         private string _Person;
         private string _Rating;
         private string _Description;
@@ -184,15 +187,15 @@ namespace ThumbsUp
                 _User = value;
             }
         }
-        public string Date
+        public DateTime DateTime
         {
             get
             {
-                return _Date;
+                return _DateTime;
             }
             set
             {
-                _Date = value;
+                _DateTime = value;
             }
         }
         public string Person
