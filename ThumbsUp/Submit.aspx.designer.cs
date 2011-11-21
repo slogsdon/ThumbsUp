@@ -22,22 +22,13 @@ namespace ThumbsUp {
         protected global::System.Web.UI.HtmlControls.HtmlForm Form1;
         
         /// <summary>
-        /// lblName control.
+        /// employeeValidator control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblName;
-        
-        /// <summary>
-        /// lblAuthType control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblAuthType;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator employeeValidator;
         
         /// <summary>
         /// selectOUUsers control.
@@ -49,6 +40,15 @@ namespace ThumbsUp {
         protected global::System.Web.UI.WebControls.DropDownList selectOUUsers;
         
         /// <summary>
+        /// ratingValidator control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator ratingValidator;
+        
+        /// <summary>
         /// lbRating control.
         /// </summary>
         /// <remarks>
@@ -58,6 +58,15 @@ namespace ThumbsUp {
         protected global::System.Web.UI.WebControls.RadioButtonList lbRating;
         
         /// <summary>
+        /// descriptionValidator control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator descriptionValidator;
+        
+        /// <summary>
         /// txtBoxDescription control.
         /// </summary>
         /// <remarks>
@@ -65,5 +74,26 @@ namespace ThumbsUp {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtBoxDescription;
+        
+        /// <summary>
+        /// btnSubmit control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlInputSubmit btnSubmit;
+        
+        /// <summary>
+        /// Master property.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated property.
+        /// </remarks>
+        public new ThumbsUp.Site Master {
+            get {
+                return ((ThumbsUp.Site)(base.Master));
+            }
+        }
     }
 }

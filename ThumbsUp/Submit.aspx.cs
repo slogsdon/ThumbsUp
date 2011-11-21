@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -16,19 +16,18 @@ namespace ThumbsUp
     public partial class Submit : System.Web.UI.Page
     {
         protected string _user;
+        protected string _db;
 
         protected void Page_Load(object sender, EventArgs e)
         {
             Page.Header.Title = Page.Header.Title + " - Submit";
-            _user = (Context.User.Identity.Name.Split('\\'))[1].ToString();
-
-            lblName.Text = "Hello " + Context.User.Identity.Name + ".";
-            lblAuthType.Text = "You were authenticated using " + Context.User.Identity.AuthenticationType + ".";
+            _user = (Context.User.Identity.Name.Split('\\'))[1].ToString();// ldap auth just needs Context.User.Identity.Name
+            _db = Master.SubmissionsAccessDS.DataFile;
 
             BindDropDownList();
             BindRadioList();
 
-            if (IsPostBack)
+            if (IsPostBack && IsValid)
             {
                 FormSubmit();
             }
@@ -38,26 +37,37 @@ namespace ThumbsUp
         {
             Form1.Visible = false;
             ListItemCollection results = new ListItemCollection();
+            string person = null;
+
             foreach (string key in Request.Form.Keys)
             {
                 if (key.Substring(0, 2) != "__")
                 {
                     string[] keyArray = key.Split('$');
                     results.Add(new ListItem(keyArray[keyArray.Length - 1], Request.Form[key]));
+                    if (keyArray[keyArray.Length - 1] == "Person") person = Request.Form[key];
                 }
             }
             OleDbConnection connection = new OleDbConnection("Provider=Microsoft.Jet.Oledb.4.0;" +
-                        "Data Source=" + Server.MapPath("db.mdb"));
+                        "Data Source=" + Server.MapPath(_db));
             connection.Open();
 
             string query = "INSERT INTO Submissions([User], [Person], [Rating], [Description], [Votes]) VALUES {1};";
             string values = "'" + _user + "', ";
             foreach (ListItem item in results)
             {
-                values += "'" + item.Value + "', ";
+                //if (item.Text == "Description")
+                //{
+                //    string val = stripNames(item.Value, person);
+                //    Master.Message.Text += val;
+                //    values += "'" + val + "', ";
+                //}
+                //else
+                //{
+                    values += "'" + item.Value + "', ";
+                //}
             }
-            values += "'" + _user + "'";
-
+            values += "'," + _user + "'";
             query = query.Replace("{1};", "(" + values + ");");
 
             OleDbCommand command = new OleDbCommand(query, connection);
@@ -74,6 +84,55 @@ namespace ThumbsUp
             connection.Close();
 
             Response.Redirect("Index.aspx");
+        }
+
+        public string stripNames(string text, string person)
+        {
+            string displayName = (new LdapAuthentication(Context.User.Identity.Name.Split('\\')[0])).
+                GetUserDisplayName(person);
+            List<string> excludes = new List<string>();
+
+            excludes.Add(person);
+            foreach (string str in displayName.Split(' '))
+            {
+                excludes.Add(str);
+                excludes.Add(str.ToLower());
+                excludes.Add(str.ToLowerInvariant());
+                excludes.Add(str.ToUpper());
+                excludes.Add(str.ToUpperInvariant());
+            }
+            
+            foreach (string search in excludes)
+            {
+                text = ReplaceEx(text, person, "the employee");
+            }
+
+            return text;
+        }
+
+        private static string ReplaceEx(string original,
+                    string pattern, string replacement)
+        {
+            int count, position0, position1;
+            count = position0 = position1 = 0;
+            string upperString = original.ToUpper();
+            string upperPattern = pattern.ToUpper();
+            int inc = (original.Length / pattern.Length) *
+                      (replacement.Length - pattern.Length);
+            char[] chars = new char[original.Length + Math.Max(0, inc)];
+            while ((position1 = upperString.IndexOf(upperPattern,
+                                              position0)) != -1)
+            {
+                for (int i = position0; i < position1; ++i)
+                    chars[count++] = original[i];
+                for (int i = 0; i < replacement.Length; ++i)
+                    chars[count++] = replacement[i];
+                position0 = position1 + pattern.Length;
+            }
+            if (position0 == 0) return original;
+            for (int i = position0; i < original.Length; ++i)
+                chars[count++] = original[i];
+            return new string(chars, 0, count);
         }
 
         public void BindDropDownList()
@@ -98,14 +157,14 @@ namespace ThumbsUp
                 "hrtest", "helpdesk", "ibmdirector", "ittestaccount", "dosstest", "stapler",
                 "Mastercard", "Test1", "ipads", "oci", "ULTEST", "TellerTest", "mshift"
             };
-
+            
             foreach (DataTable dt in ds.Tables)
             {
                 foreach (DataRow dr in dt.Rows)
                 {
                     if (!exclude.Contains(dr["sAMAccountName"]))
                     {
-                        if (dr["sAMAccountName"].ToString() != _user && // ldap auth just needs Context.User.Identity.Name
+                        if (dr["sAMAccountName"].ToString() != _user && 
                             (dr["userAccountControl"].ToString() == "512" ||
                             dr["userAccountControl"].ToString() == "1114624"))
                         {

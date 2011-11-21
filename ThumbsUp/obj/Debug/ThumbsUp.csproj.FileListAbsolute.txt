@@ -8,3 +8,6 @@ C:\Users\shane\Code\ThumbsUp\ThumbsUp\bin\ThumbsUp.pdb
 C:\Users\shane\Code\ThumbsUp\ThumbsUp\obj\Debug\ResolveAssemblyReference.cache
 C:\Users\shane\Code\ThumbsUp\ThumbsUp\obj\Debug\ThumbsUp.dll
 C:\Users\shane\Code\ThumbsUp\ThumbsUp\obj\Debug\ThumbsUp.pdb
+C:\Users\slogsdon\Documents\Visual Studio 2010\Projects\ThumbsUp\ThumbsUp\obj\Debug\ThumbsUp.Properties.Resources.resources
+C:\Users\slogsdon\Documents\Visual Studio 2010\Projects\ThumbsUp\ThumbsUp\obj\Debug\GenerateResource.read.1.tlog
+C:\Users\slogsdon\Documents\Visual Studio 2010\Projects\ThumbsUp\ThumbsUp\obj\Debug\GenerateResource.write.1.tlog

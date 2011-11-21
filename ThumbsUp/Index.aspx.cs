@@ -5,6 +5,7 @@ using System.Web.UI;
 
 using System.Data;
 using System.Data.OleDb;
+using System.Collections.Generic;
 
 namespace ThumbsUp
 {
@@ -12,62 +13,52 @@ namespace ThumbsUp
     {
         protected string _user;
         protected string _db;
-        protected ArrayList _dbItemList;
+        protected List<DBItem> _dbItemList;
         protected string _thumbImg;
 
         protected void Page_Load(object sender, EventArgs e)
         {
             Page.Header.Title = Page.Header.Title + " - Index";
             _user = Context.User.Identity.Name.Split('\\')[1].ToString();
-            _db = SubmissionsAccessDS.DataFile;
-            _thumbImg = "img/thumb.png";
+            _db = Master.SubmissionsAccessDS.DataFile;
             
-            SubmissionsPlcHldr_Populate();
-        }
-
-        protected void SubmissionsPlcHldr_Populate()
-        {
-            using (SubmissionsPlcHldr)
+            if (Request.QueryString.HasKeys() && null != Request.QueryString.GetValues("VoteId"))
             {
-                Controls.Add(new LiteralControl("<div id=\"submissions\">\n"));
-
-                ArrayList list = GetSubmissions();
-                if (null != list)
-                {
-                    foreach (DBItem item in list)
-                    {
-                        Controls.Add(new LiteralControl("\t<div class=\"submission\">\n"));
-                        Controls.Add(new LiteralControl("\t\t<span class=\"DateTime\">\n"));
-                        Controls.Add(new LiteralControl("\t\t\t" + item.DateTime + "\n"));
-                        Controls.Add(new LiteralControl("\t\t</span>\n"));
-                        Controls.Add(new LiteralControl("\t\t<p>\n"));
-                        Controls.Add(new LiteralControl("\t\t\t" + item.Description + "\n"));
-                        Controls.Add(new LiteralControl("\t\t</p>\n"));
-                        Controls.Add(new LiteralControl("\t\t<div>\n"));
-                        Controls.Add(new LiteralControl("\t\t\t<img src=\"" + Server.MapPath(_thumbImg) + "\" alt=\"thumb\" />\n"));
-                        Controls.Add(new LiteralControl("\t\t\t<span class=\"vote_count\">\n"));
-                        Controls.Add(new LiteralControl("\t\t\t\t" + (item.Votes.Split(',').Length - 1) + "\n"));
-                        Controls.Add(new LiteralControl("\t\t\t</span>\n"));
-                        Controls.Add(new LiteralControl("\t\t</div>\n"));
-                        Controls.Add(new LiteralControl("\t</div>\n"));
-                    }
-                }
-
-                Controls.Add(new LiteralControl("</div>\n"));
+                VoteUp(Request.QueryString.GetValues("VoteID")[0]);
             }
+
+            if (Request.QueryString.HasKeys() && null != Request.QueryString.GetValues("id"))
+            {
+                SubmissionsRepeater.DataSource = GetSubmissions(Request.QueryString.GetValues("id")[0]);
+            }
+            else
+            {
+                SubmissionsRepeater.DataSource = GetSubmissions();
+            }
+
+            SubmissionsRepeater.DataBind();
+
         }
 
-        protected ArrayList GetSubmissions()
+        protected List<DBItem> GetSubmissions(string id = null)
         {
-            string query = "SELECT [ID], [User], [DateTime], [Person], [Rating], [Description], [Votes] FROM [Submissions];";
+            DateTime now = DateTime.Now;
+            string query = "SELECT [ID], [User], [DateTime], [Person], [Rating], [Description], [Votes] FROM [Submissions] WHERE [DateTime] > #" +
+                new DateTime(now.Year, now.Month, 1).ToString() + "#;";
+            
+            if (null != id)
+            {
+                query = query.Substring(0, query.Length - 1) + " AND [ID] = " + id + ";";
+            }
+
             ExecuteQuery(query, GetSubmissionsQueryCallback);
 
             return _dbItemList;
         }
 
-        protected ArrayList GetSubmissionsQueryCallback(OleDbDataReader reader)
+        protected List<DBItem> GetSubmissionsQueryCallback(OleDbDataReader reader)
         {
-            ArrayList returnList = new ArrayList();
+            List<DBItem> returnList = new List<DBItem>();
 
             if (reader.HasRows)
             {
@@ -89,17 +80,24 @@ namespace ThumbsUp
             return returnList;
         }
 
-        protected ArrayList GetVotes(int id)
+        protected string GetVotes(string id)
         {
-            string query = "SELECT [Votes] FROM Submissions WHERE [ID] = " + id + ";";
+            string query = "SELECT [Votes] FROM [Submissions] WHERE ([ID] = " + id + ");";
             ExecuteQuery(query, GetVotesQueryCallback);
-            
-            return _dbItemList;
+
+            string result = "";
+
+            foreach (DBItem item in _dbItemList)
+            {
+                result += item.Votes;
+            }
+
+            return result;
         }
 
-        protected ArrayList GetVotesQueryCallback(OleDbDataReader reader)
+        protected List<DBItem> GetVotesQueryCallback(OleDbDataReader reader)
         {
-            ArrayList returnList = new ArrayList { };
+            List<DBItem> returnList = new List<DBItem> { };
 
             if (reader.HasRows)
             {
@@ -113,19 +111,33 @@ namespace ThumbsUp
             return returnList;
         }
 
-        protected bool ExecuteQuery(string query, Func<OleDbDataReader, ArrayList> callback = null)
+        protected void VoteUp(string id)
+        {
+            string list = GetVotes(id);
+            string query = "UPDATE Submissions SET [Votes] = '" + list + "," + _user + "' WHERE ([ID] = " + id + ");";
+            foreach (string voter in list.Split(','))
+            {
+                if (voter == _user)
+                {
+                    return;
+                }
+            }
+            ExecuteQuery(query);
+        }
+
+        protected bool ExecuteQuery(string query, Func<OleDbDataReader, List<DBItem>> callback = null)
         {
             bool rowsAffected = false;
             
             OleDbConnection connection = new OleDbConnection("Provider=Microsoft.Jet.Oledb.4.0;" +
                 "Data Source=" + Server.MapPath(_db));
-            try
-            {
+            //try
+            //{
                 connection.Open();
                 using (OleDbCommand command = new OleDbCommand(query, connection))
                 {
-                    try
-                    {
+                    //try
+                    //{
                         if (query.Substring(0, 6) == "SELECT")
                         {
                             if (callback != null)
@@ -139,108 +151,19 @@ namespace ThumbsUp
                             rowsAffected = Convert.ToBoolean(command.ExecuteNonQuery());
                         }
 
-                    }
-                    catch (OleDbException e)
-                    {
-                        // cannot excute query
-                    }
+                    //}
+                    //catch (OleDbException e)
+                    //{
+                    //    Message.Text += "_dbItemList is null. " + e.Message + "\n";
+                    //}
                 }
                 connection.Close();
-            }
-            catch (OleDbException e)
-            {
-                // cannot connect
-            }
+            //}
+            //catch (OleDbException e)
+            //{
+            //    Message.Text += "_dbItemList is null. " + e.Message + "\n";
+            //}
             return rowsAffected;
-        }
-    }
-
-    public struct DBItem
-    {
-        private int _ID;
-        private string _User;
-        private DateTime _DateTime;
-        private string _Person;
-        private string _Rating;
-        private string _Description;
-        private string _Votes;
-
-        public int ID
-        {
-            get
-            {
-                return _ID;
-            }
-            set
-            {
-                _ID = value;
-            }
-        }
-        public string User
-        {
-            get
-            {
-                return _User;
-            }
-            set
-            {
-                _User = value;
-            }
-        }
-        public DateTime DateTime
-        {
-            get
-            {
-                return _DateTime;
-            }
-            set
-            {
-                _DateTime = value;
-            }
-        }
-        public string Person
-        {
-            get
-            {
-                return _Person;
-            }
-            set
-            {
-                _Person = value;
-            }
-        }
-        public string Rating
-        {
-            get
-            {
-                return _Rating;
-            }
-            set
-            {
-                _Rating = value;
-            }
-        }
-        public string Description
-        {
-            get
-            {
-                return _Description;
-            }
-            set
-            {
-                _Description = value;
-            }
-        }
-        public string Votes
-        {
-            get
-            {
-                return _Votes;
-            }
-            set
-            {
-                _Votes = value;
-            }
         }
     }
 }

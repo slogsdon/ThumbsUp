@@ -22,30 +22,24 @@ namespace ThumbsUp {
         protected global::System.Web.UI.HtmlControls.HtmlForm Form1;
         
         /// <summary>
-        /// Message control.
+        /// SubmissionsRepeater control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label Message;
+        protected global::System.Web.UI.WebControls.Repeater SubmissionsRepeater;
         
         /// <summary>
-        /// SubmissionsAccessDS control.
+        /// Master property.
         /// </summary>
         /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
+        /// Auto-generated property.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.AccessDataSource SubmissionsAccessDS;
-        
-        /// <summary>
-        /// SubmissionsPlcHldr control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.PlaceHolder SubmissionsPlcHldr;
+        public new ThumbsUp.Site Master {
+            get {
+                return ((ThumbsUp.Site)(base.Master));
+            }
+        }
     }
 }

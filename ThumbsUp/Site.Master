@@ -1,18 +1,30 @@
-﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="ThumbsUp.Site" EnableViewState="False" %>
-
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml">
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" 
+    Inherits="ThumbsUp.Site" EnableViewState="False" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" runat="server">
 <head runat="server">
     <title>ThumbsUp</title>
-    <asp:ContentPlaceHolder ID="head" runat="server">
-    </asp:ContentPlaceHolder>
+    <link href="css/style.css" type="text/css" rel="stylesheet" />
+	<!--[if lte IE 8]>
+	<link rel="stylesheet" type="text/css" href="css/ie.css" />
+	<![endif]-->
+    <asp:ContentPlaceHolder ID="head" runat="server" />
 </head>
-<body>
-    <div id="main">
-        <asp:ContentPlaceHolder ID="MainPlcHldr" runat="server">
-        
-        </asp:ContentPlaceHolder>
+<body runat="server">
+    <asp:Label ID="message" runat="server" />
+    <div id="header">
+        Hello, <asp:Label ID="UserLbl" runat="server" />
+        <asp:Label ID="ListHyperLink" runat="server" Visible="false">
+            &mdash; <asp:HyperLink runat="server" NavigateUrl="~/List.aspx" Text="List" />
+        </asp:Label>
+        <asp:ContentPlaceHolder ID="HeaderPlcHldr" runat="server" />
     </div>
+    <div id="main">
+        <asp:ContentPlaceHolder ID="MainPlcHldr" runat="server" />
+    </div>
+    <div id="menu">
+        <asp:ContentPlaceHolder ID="MenuPlcHldr" runat="server" />
+    </div>
+    <div id="footer"></div>
 </body>
 </html>
